@@ -9,13 +9,12 @@ CORS(app)
 
 
 def hash_url(url):
-    return hash(url)
+    return str(hash(url))
 
 
 @app.route("/api/v1/shorten", methods=["POST"]) 
 def handle_shorten():
     long_url = request.get_json().get("url")
-    print(long_url, request.method, str(request.form.keys))
 
     # saved long_url, short_url pair in database
     db_pair = db.query("SELECT * FROM urls WHERE long_url = %s;", args=(long_url,))
@@ -26,10 +25,12 @@ def handle_shorten():
     else:
         short_url = db_pair[1]
 
-    data = {"data": {
-        "longUrl": long_url,
-        "shortUrl": short_url
-    }}
+    data = {
+        "data": {
+            "longUrl": long_url,
+            "shortUrl": short_url
+        }
+    }
 
     return jsonify(data)
 
