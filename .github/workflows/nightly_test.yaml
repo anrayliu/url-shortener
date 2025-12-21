@@ -10,4 +10,6 @@ jobs:
   nightly-trivy-scan:
     uses: ./.github/workflows/trivy_scan.yaml
     with:
-      verticals: '["url-shortener-backend", "url-shortener-frontend"]'
+      verticals: '["url-shortener-backend", 
+                   "url-shortener-frontend",
+                   "url-shortener-database"]'
