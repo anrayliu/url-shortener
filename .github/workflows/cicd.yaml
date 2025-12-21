@@ -90,15 +90,28 @@ jobs:
 
       - name: Push images
         run: |
+          # tag images with sha
+          
           docker image tag url-shortener-backend:latest \
             anrayliu/url-shortener-backend:${{ github.sha }}
-          
-          docker image tag url-shortener-frontend:latest \
-            anrayliu/url-shortener-frontend:${{ github.sha }}
-
+          docker image tag url-shortener-backend:latest \
+            anrayliu/url-shortener-backend:${{ github.sha }}
           docker image tag url-shortener-database:latest \
             anrayliu/url-shortener-database:${{ github.sha }}
+
+          # tag images with latest
+
+          docker image tag url-shortener-frontend:latest \
+            anrayliu/url-shortener-frontend:latest
+          docker image tag url-shortener-frontend:latest \
+            anrayliu/url-shortener-frontend:latest
+          docker image tag url-shortener-database:latest \
+            anrayliu/url-shortener-database:latest
 
           docker push anrayliu/url-shortener-frontend:${{ github.sha }}
           docker push anrayliu/url-shortener-backend:${{ github.sha }}
           docker push anrayliu/url-shortener-database:${{ github.sha }}
+
+          docker push anrayliu/url-shortener-frontend:latest
+          docker push anrayliu/url-shortener-backend:latest
+          docker push anrayliu/url-shortener-database:latest
