@@ -85,6 +85,7 @@ jobs:
           # using export so linter doesn't complain about unused variables
           export API_PORT=1
           export WEB_PORT=1
+          export DB_PORT=1
 
           docker compose build
 
