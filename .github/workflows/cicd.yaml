@@ -48,6 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   trivy-scan:
+    needs: push
     uses: ./.github/workflows/trivy_scan.yaml
     with:
       verticals: '["url-shortener-frontend", "url-shortener-backend"]'
