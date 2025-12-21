@@ -60,7 +60,7 @@ jobs:
       - name: Placeholder test, currently only running status tests
         run: echo "tests passed"
 
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     needs: run-tests
@@ -85,6 +85,10 @@ jobs:
 
           docker compose build
 
+  push:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Push images
         run: |
           docker image tag url-shortener-backend:latest \
