@@ -4,7 +4,13 @@ from database import Database
 from dotenv import load_dotenv
 
 
+load_dotenv()
+
 app = Flask(__name__)
+
+db = Database()
+db.connect()
+
 CORS(app)
 
 
@@ -57,7 +63,4 @@ def handle_main(url):
 
 
 if __name__ == "__main__":
-    load_dotenv()
-
-    with Database() as db:    
-        app.run(port=8000, debug=True)
+    app.run(port=5000, debug=True)

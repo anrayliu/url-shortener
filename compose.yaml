@@ -1,0 +1,19 @@
+---
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    image: url-shortener-backend:latest
+    ports:
+      - ${API_PORT}:${API_PORT}
+    env_file: .env
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    image: url-shortener-frontend:latest
+    ports:
+      - ${WEB_PORT}:${WEB_PORT}
+    env_file: .env
