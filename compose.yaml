@@ -1,3 +1,4 @@
+---
 services:
   backend:
     build:
@@ -5,7 +6,7 @@ services:
       dockerfile: backend.Dockerfile
     image: url-shortener-backend:latest
     ports:
-    - ${API_PORT}:${API_PORT}
+      - ${API_PORT}:${API_PORT}
     env_file: .env
 
   frontend:
@@ -14,5 +15,5 @@ services:
       dockerfile: frontend.Dockerfile
     image: url-shortener-frontend:latest
     ports:
-    - ${WEB_PORT}:${WEB_PORT}
+      - ${WEB_PORT}:${WEB_PORT}
     env_file: .env

@@ -48,7 +48,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   trivy-scan:
-    needs: lint
     uses: ./.github/workflows/trivy_scan.yaml
     with:
       verticals: '["url-shortener-frontend", "url-shortener-backend"]'
@@ -80,15 +79,19 @@ jobs:
       - name: Build images
         run: |
           # garbage value so compose doesn't complain about missing port
-          API_PORT=1
-          WEB_PORT=1
+          # using export so linter doesn't complain about unused variables
+          export API_PORT=1
+          export WEB_PORT=1
 
           docker compose build
 
       - name: Push images
         run: |
-          docker image tag url-shortener-backend:latest anrayliu/url-shortener-backend:${{ github.sha }}  
-          docker image tag url-shortener-frontend:latest anrayliu/url-shortener-frontend:${{ github.sha }}  
+          docker image tag url-shortener-backend:latest \
+            anrayliu/url-shortener-backend:${{ github.sha }}
+          
+          docker image tag url-shortener-frontend:latest \
+            anrayliu/url-shortener-frontend:${{ github.sha }}
 
           docker push anrayliu/url-shortener-backend:${{ github.sha }}
           docker push anrayliu/url-shortener-frontend:${{ github.sha }}
