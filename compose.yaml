@@ -17,3 +17,13 @@ services:
     ports:
       - ${WEB_PORT}:${WEB_PORT}
     env_file: .env
+
+  database:
+    build:
+      context: .
+      dockerfile: database.Dockerfile
+    image: url-shortener-database:latest
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    env_file: .env
+      
