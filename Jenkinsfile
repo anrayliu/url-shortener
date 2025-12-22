@@ -17,7 +17,7 @@ pipeline {
                         def workflowResponse = sh(
                             script: """
                                 curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
-                                "https://api.github.com/repos/anrayliu/url-shortener/actions/workflows/cicd.yml/runs?per_page=1"
+                                "https://api.github.com/repos/anrayliu/url-shortener/actions/workflows/cicd.yaml/runs?per_page=1"
                             """,
                             returnStdout: true
                         )
