@@ -39,6 +39,13 @@ jobs:
         uses: anchore/sbom-action@v0
         with:
           image: docker.io/anrayliu/${{ matrix.image }}:latest
+          artifact-name: ${{ matrix.image }}.spdx.json
 
-      - name: Print output for ${{ matrix.image }}
-        run: ls -la && cat sbom.spdx.json
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.image }}.spdx.json
+          path: artifacts
+
+      - name: Cat artifact file
+        run: cat artifacts/${{ matrix.image }}.spdx.json
