@@ -1,0 +1,74 @@
+---
+name: image scans
+
+on:
+  workflow_call:
+    inputs:
+      verticals:
+        required: true
+        type: string
+
+jobs:
+  trivy-scan:
+    name: Trivy Vulnerability Scan for ${{ matrix.image }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        image: ${{ fromJSON(inputs.verticals) }}
+
+    steps:
+      - name: Security Scan Image ${{ matrix.image }}
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: docker.io/anrayliu/${{ matrix.image }}:latest
+          severity: "CRITICAL"
+          ignore-unfixed: true
+          exit-code: 1
+
+  generate-sbom:
+    name: Generate SBOM for ${{ matrix.image }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        image: ${{ fromJSON(inputs.verticals) }}
+
+    steps:
+      - name: Create SBOM for ${{ matrix.image }}
+        uses: anchore/sbom-action@v0
+        with:
+          image: docker.io/anrayliu/${{ matrix.image }}:latest
+          artifact-name: ${{ matrix.image }}.spdx.json
+
+      # I don't know where the SBOM was written to on disk
+      # so this is a quick way to locate it
+      - name: Download SBOM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.image }}.spdx.json
+          path: artifacts
+
+      - name: Output SBOM for ${{ matrix.image }}
+        run: cat artifacts/${{ matrix.image }}.spdx.json
+
+  bandit-scan:
+    name: bandit scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.12
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit scan
+        run: |
+          bandit -r . \
+            --severity-level medium \
+            --confidence-level medium \
+            -v
+              

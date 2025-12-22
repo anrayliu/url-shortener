@@ -47,9 +47,9 @@ jobs:
           VALIDATE_YAML: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  trivy-scan:
+  image-scan:
     needs: build-and-push
-    uses: ./.github/workflows/trivy_scan.yaml
+    uses: ./.github/workflows/image_scan.yaml
     with:
       verticals: '["url-shortener-frontend", 
                    "url-shortener-backend",

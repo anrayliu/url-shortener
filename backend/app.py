@@ -13,10 +13,8 @@ db.connect()
 
 CORS(app)
 
-
 def hash_url(url):
     return str(hash(url))
-
 
 @app.route("/api/v1/shorten", methods=["POST"]) 
 def handle_shorten():
@@ -63,4 +61,4 @@ def handle_main(url):
 
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(port=5000)
