@@ -1,39 +1,60 @@
 pipeline {
     agent any
     
-    triggers {
-        pollSCM('H/5 * * * *')
-    }
-    
     stages {
         stage('Checkout') {
             steps {
-                echo '🔍 Checking out code from GitHub...'
+                echo 'checkout code'
                 checkout scm
             }
         }
         
-        stage('Detect Changes') {
+        stage('Check GitHub Actions Job') {
             steps {
                 script {
-                    echo '📋 Recent commits:'
-                    sh 'git log --oneline -5'
-                    
-                    if (fileExists('.github/workflows')) {
-                        echo '✅ GitHub Actions workflows detected'
-                        dir('.github/workflows') {
-                            sh 'ls -la'
+                    withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+                        // First, get the latest workflow run
+                        def workflowResponse = sh(
+                            script: """
+                                curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
+                                "https://api.github.com/repos/anrayliu/url-shortener/actions/workflows/cicd.yml/runs?per_page=1"
+                            """,
+                            returnStdout: true
+                        )
+                        
+                        def workflowJson = readJSON text: workflowResponse
+                        def runId = workflowJson.workflow_runs[0].id
+                        
+                        // Now get jobs for that run
+                        def jobsResponse = sh(
+                            script: """
+                                curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
+                                "https://api.github.com/repos/anrayliu/url-shortener/actions/runs/${runId}/jobs"
+                            """,
+                            returnStdout: true
+                        )
+                        
+                        def jobsJson = readJSON text: jobsResponse
+                        
+                        // Find specific job by name
+                        def targetJob = jobsJson.jobs.find { it.name == 'build-and-push' }
+                        
+                        if (!targetJob) {
+                            error("Job 'your-job-name' not found in GitHub Actions run")
                         }
+                        
+                        if (targetJob.conclusion != 'success') {
+                            error("GitHub Actions job '${targetJob.name}' failed with: ${targetJob.conclusion}")
+                        }
+                        
+                        echo "GitHub Actions job '${targetJob.name}' passed"
                     }
                 }
             }
         }
         
-    }
-    
     post {
         always {
-            echo '🏁 Pipeline completed'
             cleanWs()
         }
     }
