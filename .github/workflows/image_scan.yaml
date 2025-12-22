@@ -2,6 +2,7 @@
 name: image scans
 
 on:
+  workflow_run:
   workflow_call:
     inputs:
       verticals:
@@ -25,3 +26,17 @@ jobs:
           severity: "CRITICAL"
           ignore-unfixed: true
           exit-code: 1
+
+  generate-sbom:
+    name: Generate SBOM for ${{ matrix.image }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        image: ${{ fromJSON(inputs.verticals) }}
+
+    steps:
+      - name: SBOM creation for ${{ matrix.image }}
+        uses: anchore/sbom-action@v0
+        with:
+          image: docker.io/anrayliu/${{ matrix.image }}:latest
