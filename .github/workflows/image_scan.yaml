@@ -35,17 +35,39 @@ jobs:
         image: ${{ fromJSON(inputs.verticals) }}
 
     steps:
-      - name: SBOM creation for ${{ matrix.image }}
+      - name: Create SBOM for ${{ matrix.image }}
         uses: anchore/sbom-action@v0
         with:
           image: docker.io/anrayliu/${{ matrix.image }}:latest
           artifact-name: ${{ matrix.image }}.spdx.json
 
-      - name: Download artifact
+      # I don't know where the SBOM was written to on disk
+      # so this is a quick way to locate it
+      - name: Download SBOM artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.image }}.spdx.json
           path: artifacts
 
-      - name: Cat artifact file
+      - name: Output SBOM for ${{ matrix.image }}
         run: cat artifacts/${{ matrix.image }}.spdx.json
+
+  bandit-scan:
+    name: bandit scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.12
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit scan
+        run: |
+          bandit -r . \
+            --severity-level high \
+            --confidence-level high
+              
