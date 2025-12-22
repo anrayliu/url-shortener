@@ -39,3 +39,6 @@ jobs:
         uses: anchore/sbom-action@v0
         with:
           image: docker.io/anrayliu/${{ matrix.image }}:latest
+
+      - name: Print output for ${{ matrix.image }}
+        run: cat sbom.spdx.json
