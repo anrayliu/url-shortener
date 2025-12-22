@@ -1,5 +1,5 @@
 ---
-name: CI Trivy Scans
+name: image scans
 
 on:
   workflow_call:

@@ -1,5 +1,5 @@
 ---
-name: CI Nightly Scans
+name: nightly scans
 
 on:
   schedule:
@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  nightly-trivy-scan:
-    uses: ./.github/workflows/trivy_scan.yaml
+  image-scan:
+    uses: ./.github/workflows/image_scan.yaml
     with:
       verticals: '["url-shortener-backend", 
                    "url-shortener-frontend",
