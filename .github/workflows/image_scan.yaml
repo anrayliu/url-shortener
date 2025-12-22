@@ -41,4 +41,4 @@ jobs:
           image: docker.io/anrayliu/${{ matrix.image }}:latest
 
       - name: Print output for ${{ matrix.image }}
-        run: cat sbom.spdx.json
+        run: ls -la && cat sbom.spdx.json
