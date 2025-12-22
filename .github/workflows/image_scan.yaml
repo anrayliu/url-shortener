@@ -2,7 +2,7 @@
 name: image scans
 
 on:
-  workflow_run:
+  workflow_dispatch:
   workflow_call:
     inputs:
       verticals:
