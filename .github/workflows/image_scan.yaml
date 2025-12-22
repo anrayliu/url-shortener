@@ -41,17 +41,6 @@ jobs:
           image: docker.io/anrayliu/${{ matrix.image }}:latest
           artifact-name: ${{ matrix.image }}.spdx.json
 
-      # I don't know where the SBOM was written to on disk
-      # so this is a quick way to locate it
-      - name: Download SBOM artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.image }}.spdx.json
-          path: artifacts
-
-      - name: Output SBOM for ${{ matrix.image }}
-        run: cat artifacts/${{ matrix.image }}.spdx.json
-
   bandit-scan:
     name: bandit scan
     runs-on: ubuntu-latest
