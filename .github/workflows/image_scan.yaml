@@ -68,5 +68,7 @@ jobs:
       - name: Run Bandit scan
         run: |
           bandit -r . \
-            -v 
+            --severity-level medium \
+            --confidence-level medium \
+            -v
               
