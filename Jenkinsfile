@@ -21,15 +21,11 @@ pipeline {
                             """,
                             returnStdout: true
                         )
+                        def workflowJson = readJSON text: workflowResponse
+                        def run = workflowJson.workflow_runs[0]
+                        def status = run.status
+                        def conclusion = run.conclusion
 
-                        // Extract the 'status' field
-                        def statusMatch = workflowResponse =~ /"status"\s*:\s*"([^"]+)"/
-                        def status = statusMatch ? statusMatch[0][1] : 'null'
-                        
-                        // Extract the 'conclusion' field
-                        def conclusionMatch = workflowResponse =~ /"conclusion"\s*:\s*"([^"]+)"/
-                        def conclusion = conclusionMatch ? conclusionMatch[0][1] : 'null'
-                        
                         echo "Latest GitHub Actions Run Status: '${status}', Conclusion: '${conclusion}'"
                         
                         if (status != 'completed') {
@@ -44,8 +40,8 @@ pipeline {
                         
                         echo "✅ Verified: The latest GitHub Actions run is completed and successful."
                         
-                        def workflowJson = readJSON text: workflowResponse
-                        def runId = workflowJson.workflow_runs[0].id
+
+                        def runId = run.id
                         
                         // Now get jobs for that run
                         def jobsResponse = sh(
