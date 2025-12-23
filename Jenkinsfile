@@ -68,7 +68,9 @@ pipeline {
         }
 
         stage('Deploy') {
-            echo "deployments will happen here"
+            steps {
+                echo "deployments will happen here"
+            }
         }
 
     }
