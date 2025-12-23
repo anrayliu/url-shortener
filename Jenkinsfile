@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
-                        // First, get the latest workflow run
+                        // get latest workflow run
                         def workflowResponse = sh(
                             script: """
                                 curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
@@ -21,6 +21,28 @@ pipeline {
                             """,
                             returnStdout: true
                         )
+
+                        // Extract the 'status' field
+                        def statusMatch = apiResponse =~ '"status":"([^"]+)"'
+                        def status = statusMatch ? statusMatch[0][1] : 'NOT_FOUND'
+                        
+                        // Extract the 'conclusion' field
+                        def conclusionMatch = apiResponse =~ '"conclusion":"([^"]+)"'
+                        def conclusion = conclusionMatch ? conclusionMatch[0][1] : 'NOT_FOUND'
+                        
+                        echo "Latest GitHub Actions Run Status: '${status}', Conclusion: '${conclusion}'"
+                        
+                        if (status != 'completed') {
+                            currentBuild.result = 'ABORTED'
+                            error("Latest run is not completed. It is '${status}'. Jenkins will retry later.")
+                        }
+                        
+                        if (conclusion != 'success') {
+                            currentBuild.result = 'ABORTED'
+                            error("Latest completed run did not succeed. Conclusion: '${conclusion}'.")
+                        }
+                        
+                        echo "✅ Verified: The latest GitHub Actions run is completed and successful."
                         
                         def workflowJson = readJSON text: workflowResponse
                         def runId = workflowJson.workflow_runs[0].id
