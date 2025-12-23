@@ -24,11 +24,11 @@ pipeline {
 
                         // Extract the 'status' field
                         def statusMatch = workflowResponse =~ /"status"\s*:\s*"([^"]+)"/
-                        def status = statusMatch ? statusMatch[0][1] : 'NOT_FOUND'
+                        def status = statusMatch ? statusMatch[0][1] : 'null'
                         
                         // Extract the 'conclusion' field
-                        def conclusionMatch = workflowResponse =~ /"conclusion"\s*:\s*(null|"[^"]+")/
-                        def conclusion = conclusionMatch ? conclusionMatch[0][1] : 'NOT_FOUND'
+                        def conclusionMatch = workflowResponse =~ /"conclusion"\s*:\s*"([^"]+)"/
+                        def conclusion = conclusionMatch ? conclusionMatch[0][1] : 'null'
                         
                         echo "Latest GitHub Actions Run Status: '${status}', Conclusion: '${conclusion}'"
                         
