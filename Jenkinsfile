@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
-                        // get latest workflow run
+                        // get workflow history
                         def workflowResponse = sh(
                             script: """
                                 curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
@@ -22,53 +22,53 @@ pipeline {
                             returnStdout: true
                         )
                         def workflowJson = readJSON text: workflowResponse
+
+                        // get latest run
                         def run = workflowJson.workflow_runs[0]
-                        def status = run.status
-                        def conclusion = run.conclusion
 
-                        echo "Latest GitHub Actions Run Status: '${status}', Conclusion: '${conclusion}'"
+                        echo "Latest GitHub Actions run: '${run.status}', '${run.conclusion}'"
                         
-                        if (status != 'completed') {
+                        // check that latest run is completed and successful
+                        if (run.status != 'completed') {
                             currentBuild.result = 'ABORTED'
-                            error("Latest run is not completed. It is '${status}'. Jenkins will retry later.")
+                            error("Latest GitHub Actions run hasn't completed. Jenkins will retry on next poll.")
                         }
                         
-                        if (conclusion != 'success') {
+                        if (run.conclusion != 'success') {
                             currentBuild.result = 'ABORTED'
-                            error("Latest completed run did not succeed. Conclusion: '${conclusion}'.")
+                            error("Latest GitHub Actions wasn't successful. Jenkins will retry on next poll.")
                         }
                         
-                        echo "✅ Verified: The latest GitHub Actions run is completed and successful."
-                        
-
-                        def runId = run.id
-                        
-                        // Now get jobs for that run
+                        // get jobs for latest run
                         def jobsResponse = sh(
                             script: """
                                 curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
-                                "https://api.github.com/repos/anrayliu/url-shortener/actions/runs/${runId}/jobs"
+                                "https://api.github.com/repos/anrayliu/url-shortener/actions/runs/${run.id}/jobs"
                             """,
                             returnStdout: true
                         )
-                        
                         def jobsJson = readJSON text: jobsResponse
                         
-                        // Find specific job by name
+                        // get build and push job
                         def targetJob = jobsJson.jobs.find { it.name == 'build-and-push' }
-                        
+
                         if (!targetJob) {
-                            error("Job 'your-job-name' not found in GitHub Actions run")
+                            error("GitHub Actions job not found: '${targetJob.name}'")
                         }
                         
+                        // check that target job in GitHub Actions was successful, thereby triggering rest of jenkins pipeline
                         if (targetJob.conclusion != 'success') {
                             error("GitHub Actions job '${targetJob.name}' failed with: ${targetJob.conclusion}")
                         }
                         
-                        echo "GitHub Actions job '${targetJob.name}' passed"
+                        echo "All checks have passed. Jenkins pipeline will now continue."
                     }
                 }
             }
+        }
+
+        stage('Deploy') {
+            echo "deployments will happen here"
         }
 
     }
