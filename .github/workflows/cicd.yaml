@@ -27,7 +27,7 @@ jobs:
             backend:
               - "backend/*"
             database:
-              - "database/**"
+              - "backend/database/**"
             cicd:
               - ".github/workflows/**"
           base: ${{ github.event.before || 'HEAD^1' }}
