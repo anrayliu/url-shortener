@@ -7,7 +7,10 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      src: ${{ steps.filter.outputs.src }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      database: ${{ steps.filter.outputs.database }}
+      cicd: ${{ steps.filter.outputs.cicd }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -18,17 +21,24 @@ jobs:
         id: filter
         with:
           filters: |
-            src:
-              - "*.py"
-              - "*.html"
-              - "Dockerfile.*"
+            frontend:
+              - "frontend/**"
+            backend:
+              - "backend/*"
+            database:
+              - "backend/database/**"
+            cicd:
               - ".github/workflows/**"
-          base: ${{ github.event.before || 'HEAD^1' }}
+          base: ${{ github.event.before }}
 
   lint:
     runs-on: ubuntu-latest
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' }}
+    if: |
+      needs.changes.outputs.frontend == 'true' ||
+      needs.changes.outputs.backend == 'true' ||
+      needs.changes.outputs.database == 'true' ||
+      needs.changes.outputs.cicd == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,72 +57,56 @@ jobs:
           VALIDATE_YAML: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  image-scan:
-    needs: build-and-push
-    uses: ./.github/workflows/image_scan.yaml
-    with:
-      verticals: '["url-shortener-frontend", 
-                   "url-shortener-backend",
-                   "url-shortener-database"]'
-
   run-tests:
     runs-on: ubuntu-latest
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' }}
+    if: needs.changes.outputs.backend == 'true'
     steps:
       - name: Placeholder test, currently only running status tests
+        id: unit-tests
         run: echo "tests passed"
 
-  build-and-push:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+  build-and-push-frontend:
+    needs: changes
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.frontend == 'true'
+    uses: ./.github/workflows/build-push.yaml
+    with:
+      image: "frontend"
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  build-and-push-backend:
     needs: run-tests
-    steps:
-      - uses: actions/checkout@v5
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/build-push.yaml
+    with:
+      image: "backend"
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
+  build-and-push-database:
+    needs: changes
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.database == 'true'
+    uses: ./.github/workflows/build-push.yaml
+    with:
+      image: "database"
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: anrayliu
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  scan-frontend:
+    needs: build-and-push-frontend
+    uses: ./.github/workflows/image_scan.yaml
+    with:
+      verticals: '["url-shortener-frontend"]'
 
-      - name: Build images
-        run: |
-          # garbage value so compose doesn't complain about missing port
-          # using export so linter doesn't complain about unused variables
-          export API_PORT=1
-          export WEB_PORT=1
-          export DB_PORT=1
+  scan-backend:
+    needs: build-and-push-backend
+    uses: ./.github/workflows/image_scan.yaml
+    with:
+      verticals: '["url-shortener-backend"]'
 
-          docker compose build
-
-      - name: Push images
-        run: |
-          # tag images with sha
-          
-          docker image tag url-shortener-frontend:latest \
-            anrayliu/url-shortener-frontend:${{ github.sha }}
-          docker image tag url-shortener-backend:latest \
-            anrayliu/url-shortener-backend:${{ github.sha }}
-          docker image tag url-shortener-database:latest \
-            anrayliu/url-shortener-database:${{ github.sha }}
-
-          # tag images with latest
-
-          docker image tag url-shortener-frontend:latest \
-            anrayliu/url-shortener-frontend:latest
-          docker image tag url-shortener-backend:latest \
-            anrayliu/url-shortener-backend:latest
-          docker image tag url-shortener-database:latest \
-            anrayliu/url-shortener-database:latest
-
-          docker push anrayliu/url-shortener-frontend:${{ github.sha }}
-          docker push anrayliu/url-shortener-backend:${{ github.sha }}
-          docker push anrayliu/url-shortener-database:${{ github.sha }}
-
-          docker push anrayliu/url-shortener-frontend:latest
-          docker push anrayliu/url-shortener-backend:latest
-          docker push anrayliu/url-shortener-database:latest
+  scan-database:
+    needs: build-and-push-database
+    uses: ./.github/workflows/image_scan.yaml
+    with:
+      verticals: '["url-shortener-database"]'
