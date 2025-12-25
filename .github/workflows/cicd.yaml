@@ -29,7 +29,7 @@ jobs:
               - "backend/database/**"
             cicd:
               - ".github/workflows/**"
-          base: ${{ github.event.before || 'HEAD^1' }}
+          base: ${{ github.event.before }}
 
   lint:
     runs-on: ubuntu-latest
