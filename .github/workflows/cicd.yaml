@@ -25,7 +25,7 @@ jobs:
             frontend:
               - "frontend/**"
             backend:
-              - "backend/**"
+              - "backend/*"
             database:
               - "database/**"
             cicd:
@@ -77,7 +77,7 @@ jobs:
 
   build-and-push-backend:
     needs: run-tests
-    if: github.ref == 'refs/heads/main' && needs.run-tests.outputs.status == 'true'
+    if: github.ref == 'refs/heads/main' && needs.run-tests.outputs.status == 'success'
     uses: ./.github/workflows/build-push.yaml
     with:
       image: "backend"
