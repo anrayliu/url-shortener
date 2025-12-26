@@ -1,0 +1,35 @@
+---
+- name: Set up compose and ssh user
+  hosts: all
+  remote_user: root
+  become: yes
+
+  vars:
+    jenkins_username: "jenkins"
+    public_key_path: "~/.ssh/jenkins_user.pub"
+  
+  tasks:
+  - name: Upgrade packages
+    apt:
+      update_cache: true
+      upgrade: yes
+      
+  - name: Install docker
+    ansible.builtin.include_role:
+      name: geerlingguy.docker
+    vars:
+      docker_users:
+      - docker
+      docker_install_compose_plugin: true
+      docker_install_compose: false
+
+  - name: Add jenkins user
+    ansible.builtin.user:
+      name: "{{ jenkins_username }}"
+      create_home: yes
+      shell: /bin/bash
+    
+  - name: Add ssh key
+    ansible.posix.authorized_key:
+      user: "{{ jenkins_username }}"
+      key: "{{ lookup('file', '{{ public_key_path }}') }}"
