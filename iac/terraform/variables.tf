@@ -7,3 +7,8 @@ variable "dev_root_password" {
     type = string
     sensitive = true
 }
+
+variable "ssh_keys" {
+    type = string
+    sensitive = true
+}
