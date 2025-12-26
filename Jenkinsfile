@@ -35,14 +35,13 @@ pipeline {
                         echo "Latest GitHub Actions run: '${run.status}', '${run.conclusion}'"
                         
                         // check that latest run is completed and successful
-                        if (run.status != 'completed') {
+                        if (run.status != 'completed' || run.conclusion != 'success') {
+                            echo "Latest run status: ${run.status}, conclusion: ${run.conclusion}"
+                            echo "Waiting..."
+                            sleep(time: 2, unit: 'MINUTES')
+                            build job: env.JOB_NAME wait: false
                             currentBuild.result = 'ABORTED'
-                            error("Latest GitHub Actions run hasn't completed. Jenkins will retry on next poll.")
-                        }
-                        
-                        if (run.conclusion != 'success') {
-                            currentBuild.result = 'ABORTED'
-                            error("Latest GitHub Actions wasn't successful. Jenkins will retry on next poll.")
+                            error("Starting new pipeline.")
                         }
                         
                         // get jobs for latest run
@@ -66,7 +65,7 @@ pipeline {
                             
                             // Find the specific job in the JSON payload
                             // adds build-and-push if job was ran, otherwise only contains jobName
-                            def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" or it.name == "${jobName}"}
+                            def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" || it.name == "${jobName}"}
 
                             if (!targetJob) {
                                 error("GitHub Actions job not found: '${jobName}'")
