@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    image: url-shortener-backend:latest
+    image: anrayliu/url-shortener-backend:latest
     ports:
       - ${API_PORT}:${API_PORT}
     env_file: .env
@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    image: url-shortener-frontend:latest
+    image: anrayliu/url-shortener-frontend:latest
     ports:
       - ${WEB_PORT}:80
     depends_on:
@@ -34,7 +34,7 @@ services:
     build:
       context: .
       dockerfile: backend/database/Dockerfile
-    image: url-shortener-database:latest
+    image: anrayliu/url-shortener-database:latest
     ports:
       - ${DB_PORT}:${DB_PORT}
     environment:
