@@ -33,3 +33,8 @@
     ansible.posix.authorized_key:
       user: "{{ jenkins_username }}"
       key: "{{ lookup('file', '{{ public_key_path }}') }}"
+
+  - name: Upload .env
+    ansible.builtin.copy:
+      src: ../../.env
+      dest: /home/jenkins/.env
