@@ -68,7 +68,7 @@ jobs:
 
   build-and-push-frontend:
     needs: changes
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.frontend == 'true'
     uses: ./.github/workflows/build-push.yaml
     with:
       image: "frontend"
@@ -77,7 +77,6 @@ jobs:
 
   build-and-push-backend:
     needs: run-tests
-    if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/build-push.yaml
     with:
       image: "backend"
@@ -86,7 +85,7 @@ jobs:
 
   build-and-push-database:
     needs: changes
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.database == 'true'
+    if: needs.changes.outputs.database == 'true'
     uses: ./.github/workflows/build-push.yaml
     with:
       image: "database"

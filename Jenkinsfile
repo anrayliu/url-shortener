@@ -1,6 +1,12 @@
 pipeline {
     agent any
-    
+
+    parameters {
+        boolean(name: 'frontend_built', defaultValue: false)
+        boolean(name: 'backend_built', defaultValue: false)
+        boolean(name: 'database_built', defaultValue: false)
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -49,19 +55,27 @@ pipeline {
                         )
                         def jobsJson = readJSON text: jobsResponse
                         
-                        // get build and push job
-                        def targetJob = jobsJson.jobs.find { it.name == 'build-and-push' }
+                        def components = ['frontend', 'backend', 'database']
 
-                        if (!targetJob) {
-                            error("GitHub Actions job not found: '${targetJob.name}'")
+                        components.each { component ->
+                            def jobName = "build-and-push-${component}"
+                            
+                            // Find the specific job in the JSON payload
+                            def targetJob = jobsJson.jobs.find { it.name == jobName }
+
+                            if (!targetJob) {
+                                error("GitHub Actions job not found: '${jobName}'")
+                            }
+                            
+                            // Check for success and set a dynamic environment variable
+                            if (targetJob.conclusion == 'success') {
+                                echo "Successfully verified ${jobName}"
+                                // Sets env.frontend_built, env.backend_built, etc.
+                                env."${component}_built" = true
+                            } else {
+                                echo "GitHub Actions job '${jobName}' failed with status: ${targetJob.conclusion}"
+                            }
                         }
-                        
-                        // check that target job in GitHub Actions was successful, thereby triggering rest of jenkins pipeline
-                        if (targetJob.conclusion != 'success') {
-                            error("GitHub Actions job '${targetJob.name}' failed with: ${targetJob.conclusion}")
-                        }
-                        
-                        echo "All checks have passed. Jenkins pipeline will now continue."
                     }
                 }
             }
