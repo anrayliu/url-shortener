@@ -65,11 +65,11 @@ pipeline {
                             def jobName = "build-and-push-${component}"
                             
                             // Find the specific job in the JSON payload
-                            def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" }
+                            // adds build-and-push if job was ran, otherwise only contains jobName
+                            def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" or it.name == "${jobName}"}
 
                             if (!targetJob) {
-                                echo "GitHub Actions job not found: '${jobName}'"
-                                return
+                                error("GitHub Actions job not found: '${jobName}'")
                             }
                             
                             // Check for success and set a dynamic environment variable
