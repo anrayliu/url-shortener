@@ -58,23 +58,29 @@ pipeline {
                         def components = ['frontend', 'backend', 'database']
 
                         components.each { component ->
+                            if (env."${component}_built" == true) {
+                                continue
+                            }
+
                             def jobName = "build-and-push-${component}"
                             
                             // Find the specific job in the JSON payload
                             def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" }
 
                             if (!targetJob) {
-                                error("GitHub Actions job not found: '${jobName}'")
+                                echo "GitHub Actions job not found: '${jobName}'"
+                                continue
                             }
                             
                             // Check for success and set a dynamic environment variable
                             if (targetJob.conclusion == 'success') {
                                 echo "Successfully verified ${jobName}"
-                                // Sets env.frontend_built, env.backend_built, etc.
                                 env."${component}_built" = true
-                            } else {
-                                echo "GitHub Actions job '${jobName}' failed with status: ${targetJob.conclusion}"
+                                continue
                             }
+
+                            echo "GitHub Actions job '${jobName}' failed with status: ${targetJob.conclusion}"
+                            
                         }
                     }
                 }
