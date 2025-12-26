@@ -21,7 +21,7 @@ resource "proxmox_lxc" "dev" {
     network {
         name = "eth0"
         bridge = "vmbr0"
-        ip = "dhcp"
+        ip = var.dev_container_ip
     }
     rootfs {
         storage = "local-lvm"
