@@ -61,10 +61,9 @@ pipeline {
                             def jobName = "build-and-push-${component}"
                             
                             // Find the specific job in the JSON payload
-                            def targetJob = jobsJson.jobs.find { it.name == jobName }
+                            def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" }
 
                             if (!targetJob) {
-                                echo "${jobsJson}"
                                 error("GitHub Actions job not found: '${jobName}'")
                             }
                             
