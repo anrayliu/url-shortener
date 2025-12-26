@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     parameters {
-        boolean(name: 'frontend_built', defaultValue: false)
-        boolean(name: 'backend_built', defaultValue: false)
-        boolean(name: 'database_built', defaultValue: false)
+        booleanParam(name: 'frontend_built', defaultValue: false)
+        booleanParam(name: 'backend_built', defaultValue: false)
+        booleanParam(name: 'database_built', defaultValue: false)
     }
 
     stages {
