@@ -35,10 +35,8 @@ jobs:
 
       - name: Push image ${{ inputs.image }}
         run: |
-          docker image tag url-shortener-${{ inputs.image }}:latest \
+          docker image tag anrayliu/url-shortener-${{ inputs.image }}:latest \
           anrayliu/url-shortener-${{ inputs.image }}:${{ github.sha }}
-          docker image tag url-shortener-${{ inputs.image }}:latest \
-          anrayliu/url-shortener-${{ inputs.image }}:latest
 
           docker push anrayliu/url-shortener-${{ inputs.image }}:${{ github.sha }}
           docker push anrayliu/url-shortener-${{ inputs.image }}:latest
