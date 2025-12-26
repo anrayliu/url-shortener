@@ -59,7 +59,7 @@ pipeline {
 
                         components.each { component ->
                             if (env."${component}_built" == true) {
-                                continue
+                                return
                             }
 
                             def jobName = "build-and-push-${component}"
@@ -69,19 +69,22 @@ pipeline {
 
                             if (!targetJob) {
                                 echo "GitHub Actions job not found: '${jobName}'"
-                                continue
+                                return
                             }
                             
                             // Check for success and set a dynamic environment variable
                             if (targetJob.conclusion == 'success') {
                                 echo "Successfully verified ${jobName}"
                                 env."${component}_built" = true
-                                continue
+                                return
                             }
 
                             echo "GitHub Actions job '${jobName}' failed with status: ${targetJob.conclusion}"
-                            
                         }
+
+                        echo "Frontend status: ${env.frontend_built}"
+                        echo "Backend status: ${env.backend_built}"
+                        echo "Database status: ${env.database_built}"
                     }
                 }
             }
