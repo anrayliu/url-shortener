@@ -64,6 +64,7 @@ pipeline {
                             def targetJob = jobsJson.jobs.find { it.name == jobName }
 
                             if (!targetJob) {
+                                echo "${jobsJson}"
                                 error("GitHub Actions job not found: '${jobName}'")
                             }
                             
