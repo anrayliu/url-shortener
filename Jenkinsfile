@@ -101,7 +101,7 @@ pipeline {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no jenkins@${IP_ADDR} << 'EOF'
                                         docker compose pull
-                                        docker compose up
+                                        docker compose up -d
 EOF
 
                                 """
