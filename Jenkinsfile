@@ -99,8 +99,6 @@ pipeline {
                         sshagent(['jenkins-user']) {
                             withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
                                 sh """
-                                    [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
-                                    ssh-keyscan -t rsa,dsa example.com >> ~/.ssh/known_hosts  
                                     ssh -o StrictHostKeyChecking=no jenkins@${IP_ADDR} << 'EOF'
                                         docker compose pull
                                         docker compose up
