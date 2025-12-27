@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <title>URL Shortener</title> -->
+    <title>URL Shortener</title>
     <!-- <link rel="stylesheet" href="style.css"> -->
   </head>
 
@@ -11,8 +11,8 @@
 
     <h1>URL Shortener</h1>
 
-    <form id="inputForm">
-      <input type="text" id="longUrl" placeholder="Enter URL to shorten" required>
+    <form id="input-form">
+      <input type="text" id="long-url" placeholder="Enter URL to shorten" required>
       <button type="submit">Submit</button>
     </form>
 
@@ -20,12 +20,12 @@
     <a id="hyperlink" href="" target="_blank"></a>
 
 <script>
-const form = document.getElementById('inputForm');
+const form = document.getElementById('input-form');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const longUrl = document.getElementById('longUrl').value;
+  const longUrl = document.getElementById('long-url').value;
 
   try {
     const response = await fetch(
