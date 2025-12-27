@@ -42,7 +42,7 @@ pipeline {
                         if (run.status != 'completed' || run.conclusion != 'success') {
                             echo "Latest run status: ${run.status}, conclusion: ${run.conclusion}"
                             sleep(time: 1, unit: 'MINUTES')
-                            build job: env.JOB_NAME
+                            build job: env.JOB_NAME, wait: false
                             currentBuild.result = 'ABORTED'
                             error("Starting new pipeline.")
                         }
