@@ -19,7 +19,7 @@
       name: geerlingguy.docker
     vars:
       docker_users:
-      - docker
+      - jenkins
       docker_install_compose_plugin: true
       docker_install_compose: false
 
@@ -38,3 +38,8 @@
     ansible.builtin.copy:
       src: ../../.env
       dest: /home/jenkins/.env
+
+  - name: Download compose
+    ansible.builtin.get_url:
+      url: https://raw.githubusercontent.com/anrayliu/url-shortener/refs/heads/main/compose.yaml
+      dest: /home/jenkins/compose.yaml
