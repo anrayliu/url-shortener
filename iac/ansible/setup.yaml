@@ -39,7 +39,7 @@
       src: ../../.env
       dest: /home/jenkins/.env
 
-  - name: Download compose
+  - name: Download compose file
     ansible.builtin.get_url:
       url: https://raw.githubusercontent.com/anrayliu/url-shortener/refs/heads/main/compose.yaml
       dest: /home/jenkins/compose.yaml
