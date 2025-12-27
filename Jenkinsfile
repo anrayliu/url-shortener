@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        pollSCM('H/2 * * * *') 
+    }
+
     parameters {
         booleanParam(name: 'frontend_built', defaultValue: false)
         booleanParam(name: 'backend_built', defaultValue: false)
@@ -90,7 +94,21 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "deployments will happen here"
+                sshagent(['jenkins-user']) {
+                    script {
+                        if (env.frontend_built == true || env.backend_built == true || env.database_built) {
+                            withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
+                                sh """
+                                    ssh jenkins@${IP_ADDR} << 'EOF'
+                                        docker compose pull
+                                        docker compose up
+    EOF
+                                """
+                            }
+                        }
+                        
+                    }
+                }
             }
         }
 
