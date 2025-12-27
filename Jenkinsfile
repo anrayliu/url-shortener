@@ -94,19 +94,21 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sshagent(['jenkins-user']) {
-                    script {
-                        if (env.frontend_built == true || env.backend_built == true || env.database_built) {
+                script {
+                    if (env.frontend_built == true || env.backend_built == true || env.database_built) {
+                        sshagent(['jenkins-user']) {
                             withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
                                 sh """
+                                    [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
+                                    ssh-keyscan -t rsa,dsa example.com >> ~/.ssh/known_hosts  
                                     ssh jenkins@${IP_ADDR} << 'EOF'
                                         docker compose pull
                                         docker compose up
-    EOF
+EOF
+
                                 """
                             }
                         }
-                        
                     }
                 }
             }
