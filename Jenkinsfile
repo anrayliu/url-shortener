@@ -41,7 +41,7 @@ pipeline {
                         // check that latest run is completed and successful
                         if (run.status != 'completed' || run.conclusion != 'success') {
                             echo "Latest run status: ${run.status}, conclusion: ${run.conclusion}"
-                            sleep(time: 2, unit: 'MINUTES')
+                            sleep(time: 1, unit: 'MINUTES')
                             build job: env.JOB_NAME
                             currentBuild.result = 'ABORTED'
                             error("Starting new pipeline.")
@@ -101,7 +101,7 @@ pipeline {
                                 sh """
                                     [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
                                     ssh-keyscan -t rsa,dsa example.com >> ~/.ssh/known_hosts  
-                                    ssh jenkins@${IP_ADDR} << 'EOF'
+                                    ssh -o StrictHostKeyChecking=no jenkins@${IP_ADDR} << 'EOF'
                                         docker compose pull
                                         docker compose up
 EOF
