@@ -1,6 +1,16 @@
 pipeline {
     agent any
-    
+
+    triggers {
+        pollSCM('H/2 * * * *') 
+    }
+
+    parameters {
+        booleanParam(name: 'frontend_built', defaultValue: false)
+        booleanParam(name: 'backend_built', defaultValue: false)
+        booleanParam(name: 'database_built', defaultValue: false)
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -29,14 +39,12 @@ pipeline {
                         echo "Latest GitHub Actions run: '${run.status}', '${run.conclusion}'"
                         
                         // check that latest run is completed and successful
-                        if (run.status != 'completed') {
+                        if (run.status != 'completed' || run.conclusion != 'success') {
+                            echo "Latest run status: ${run.status}, conclusion: ${run.conclusion}"
+                            sleep(time: 1, unit: 'MINUTES')
+                            build job: env.JOB_NAME, wait: false
                             currentBuild.result = 'ABORTED'
-                            error("Latest GitHub Actions run hasn't completed. Jenkins will retry on next poll.")
-                        }
-                        
-                        if (run.conclusion != 'success') {
-                            currentBuild.result = 'ABORTED'
-                            error("Latest GitHub Actions wasn't successful. Jenkins will retry on next poll.")
+                            error("Starting new pipeline.")
                         }
                         
                         // get jobs for latest run
@@ -49,19 +57,36 @@ pipeline {
                         )
                         def jobsJson = readJSON text: jobsResponse
                         
-                        // get build and push job
-                        def targetJob = jobsJson.jobs.find { it.name == 'build-and-push' }
+                        def components = ['frontend', 'backend', 'database']
 
-                        if (!targetJob) {
-                            error("GitHub Actions job not found: '${targetJob.name}'")
+                        components.each { component ->
+                            if (env."${component}_built" == true) {
+                                return
+                            }
+
+                            def jobName = "build-and-push-${component}"
+                            
+                            // Find the specific job in the JSON payload
+                            // adds build-and-push if job was ran, otherwise only contains jobName
+                            def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" || it.name == "${jobName}"}
+
+                            if (!targetJob) {
+                                error("GitHub Actions job not found: '${jobName}'")
+                            }
+                            
+                            // Check for success and set a dynamic environment variable
+                            if (targetJob.conclusion == 'success') {
+                                echo "Successfully verified ${jobName}"
+                                env."${component}_built" = true
+                                return
+                            }
+
+                            echo "GitHub Actions job '${jobName}' failed with status: ${targetJob.conclusion}"
                         }
-                        
-                        // check that target job in GitHub Actions was successful, thereby triggering rest of jenkins pipeline
-                        if (targetJob.conclusion != 'success') {
-                            error("GitHub Actions job '${targetJob.name}' failed with: ${targetJob.conclusion}")
-                        }
-                        
-                        echo "All checks have passed. Jenkins pipeline will now continue."
+
+                        echo "Frontend status: ${env.frontend_built}"
+                        echo "Backend status: ${env.backend_built}"
+                        echo "Database status: ${env.database_built}"
                     }
                 }
             }
@@ -69,7 +94,21 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "deployments will happen here"
+                script {
+                    if (env.frontend_built == true || env.backend_built == true || env.database_built) {
+                        sshagent(['jenkins-user']) {
+                            withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no jenkins@${IP_ADDR} << 'EOF'
+                                        docker compose pull
+                                        docker compose up -d
+EOF
+
+                                """
+                            }
+                        }
+                    }
+                }
             }
         }
 
