@@ -104,8 +104,9 @@ pipeline {
                     echo "Frontend status: ${env.frontend_built}"
                     echo "Backend status: ${env.backend_built}"
                     echo "Database status: ${env.database_built}"
+                    echo "${env.frontend_built || env.backend_built || env.database_built}"
 
-                    if (env.frontend_built == true || env.backend_built == true || env.database_built == true) {
+                    if (env.frontend_built || env.backend_built || env.database_built) {
                         sshagent(['jenkins-user']) {
                             withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
                                 sh """
