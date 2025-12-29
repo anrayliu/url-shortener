@@ -23,70 +23,76 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
-                        // get workflow history
-                        def workflowResponse = sh(
-                            script: """
-                                curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
-                                "https://api.github.com/repos/anrayliu/url-shortener/actions/workflows/cicd.yaml/runs?per_page=1"
-                            """,
-                            returnStdout: true
-                        )
-                        def workflowJson = readJSON text: workflowResponse
+                        // repeat until github actions run is complete
+                        waitUntil {
+                            // get workflow history
+                            def workflowResponse = sh(
+                                script: """
+                                    curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
+                                    "https://api.github.com/repos/anrayliu/url-shortener/actions/workflows/cicd.yaml/runs?per_page=1"
+                                """,
+                                returnStdout: true
+                            )
+                            def workflowJson = readJSON text: workflowResponse
 
-                        // get latest run
-                        def run = workflowJson.workflow_runs[0]
+                            // get latest run
+                            def run = workflowJson.workflow_runs[0]
 
-                        echo "Latest GitHub Actions run: '${run.status}', '${run.conclusion}'"
-                        
-                        // check that latest run is completed and successful
-                        if (run.status != 'completed' || run.conclusion != 'success') {
-                            echo "Latest run status: ${run.status}, conclusion: ${run.conclusion}"
-                            sleep(time: 1, unit: 'MINUTES')
-                            build job: env.JOB_NAME, wait: false
-                            currentBuild.result = 'ABORTED'
-                            error("Starting new pipeline.")
-                        }
-                        
-                        // get jobs for latest run
-                        def jobsResponse = sh(
-                            script: """
-                                curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
-                                "https://api.github.com/repos/anrayliu/url-shortener/actions/runs/${run.id}/jobs"
-                            """,
-                            returnStdout: true
-                        )
-                        def jobsJson = readJSON text: jobsResponse
-                        
-                        def components = ['frontend', 'backend', 'database']
-
-                        components.each { component ->
-                            if (env."${component}_built" == true) {
-                                return
+                            echo "Latest GitHub Actions run: ${run.status}, ${run.conclusion}"
+                            
+                            // check that latest run is completed
+                            if (run.status != 'completed') {
+                                echo "Latest run not completed yet"
+                                sleep(time: 1, unit: 'MINUTES')
+                                return false
                             }
 
-                            def jobName = "build-and-push-${component}"
-                            
-                            // Find the specific job in the JSON payload
-                            // adds build-and-push if job was ran, otherwise only contains jobName
-                            def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" || it.name == "${jobName}"}
-
-                            if (!targetJob) {
-                                error("GitHub Actions job not found: '${jobName}'")
+                            if (run.conclusion != 'success') {
+                                error("Last run not successful.")
                             }
                             
-                            // Check for success and set a dynamic environment variable
-                            if (targetJob.conclusion == 'success') {
-                                echo "Successfully verified ${jobName}"
-                                env."${component}_built" = true
-                                return
+                            // get jobs for latest run
+                            def jobsResponse = sh(
+                                script: """
+                                    curl -s -H "Authorization: token \${GITHUB_TOKEN}" \
+                                    "https://api.github.com/repos/anrayliu/url-shortener/actions/runs/${run.id}/jobs"
+                                """,
+                                returnStdout: true
+                            )
+                            def jobsJson = readJSON text: jobsResponse
+                            
+                            for (component in ['frontend', 'backend', 'database']) {
+                                if (env."${component}_built" == true) {
+                                    continue
+                                }
+
+                                def jobName = "build-and-push-${component}"
+                                
+                                // Find the specific job in the JSON payload
+                                // adds build-and-push if job was ran, otherwise only contains jobName
+                                def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" || it.name == "${jobName}"}
+
+                                if (!targetJob) {
+                                    error("GitHub Actions job not found: ${jobName}")
+                                }
+                                
+                                // Check for success and set a dynamic environment variable
+                                if (targetJob.conclusion == 'success') {
+                                    echo "Successfully verified ${jobName}"
+                                    env."${component}_built" = true
+                                    continue
+                                }
+
+                                echo "GitHub Actions job '${jobName}' failed with status: ${targetJob.conclusion}"
                             }
 
-                            echo "GitHub Actions job '${jobName}' failed with status: ${targetJob.conclusion}"
-                        }
+                            echo "Frontend status: ${env.frontend_built}"
+                            echo "Backend status: ${env.backend_built}"
+                            echo "Database status: ${env.database_built}"
+                        
+                            return true
 
-                        echo "Frontend status: ${env.frontend_built}"
-                        echo "Backend status: ${env.backend_built}"
-                        echo "Database status: ${env.database_built}"
+                        }
                     }
                 }
             }
@@ -95,15 +101,14 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    if (env.frontend_built == true || env.backend_built == true || env.database_built) {
+                    if (env.frontend_built == true || env.backend_built == true || env.database_built == true) {
                         sshagent(['jenkins-user']) {
                             withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
                                 sh """
-                                    ssh -o StrictHostKeyChecking=no jenkins@${IP_ADDR} << 'EOF'
+                                    ssh -o StrictHostKeyChecking=no jenkins@\${IP_ADDR} << 'EOF'
                                         docker compose pull
                                         docker compose up -d
-EOF
-
+                                    EOF
                                 """
                             }
                         }
