@@ -13,6 +13,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       database: ${{ steps.filter.outputs.database }}
       cicd: ${{ steps.filter.outputs.cicd }}
+      iac: ${{ steps.filter.outputs.iac }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,6 +32,8 @@ jobs:
               - "backend/database/**"
             cicd:
               - ".github/workflows/**"
+            iac:
+              - "iac/**"  
           base: ${{ github.event.before }}
 
   lint:
@@ -40,7 +43,8 @@ jobs:
       needs.changes.outputs.frontend == 'true' ||
       needs.changes.outputs.backend == 'true' ||
       needs.changes.outputs.database == 'true' ||
-      needs.changes.outputs.cicd == 'true'
+      needs.changes.outputs.cicd == 'true' ||
+      needs.changes.outputs.iac == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
