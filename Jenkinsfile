@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        pollSCM('H/2 * * * *') 
+        pollSCM('H/2 * * * *')
     }
 
     parameters {
@@ -18,7 +18,7 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Check GitHub Actions Job') {
             steps {
                 script {
@@ -39,18 +39,18 @@ pipeline {
                             def run = workflowJson.workflow_runs[0]
 
                             echo "Latest GitHub Actions run: ${run.status}, ${run.conclusion}"
-                            
+
                             // check that latest run is completed
                             if (run.status != 'completed') {
-                                echo "Latest run not completed yet"
+                                echo 'Latest run not completed yet'
                                 sleep(time: 1, unit: 'MINUTES')
                                 return false
                             }
 
                             if (run.conclusion != 'success') {
-                                error("Last run not successful.")
+                                error('Last run not successful.')
                             }
-                            
+
                             // get jobs for latest run
                             def jobsResponse = sh(
                                 script: """
@@ -60,22 +60,23 @@ pipeline {
                                 returnStdout: true
                             )
                             def jobsJson = readJSON text: jobsResponse
-                            
+
                             for (component in ['frontend', 'backend', 'database']) {
                                 if (env."${component}_built" == true) {
                                     continue
                                 }
 
                                 def jobName = "build-and-push-${component}"
-                                
+
                                 // Find the specific job in the JSON payload
                                 // adds build-and-push if job was ran, otherwise only contains jobName
-                                def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" || it.name == "${jobName}"}
+                                def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push"
+                                                                    || it.name == "${jobName}" }
 
                                 if (!targetJob) {
                                     error("GitHub Actions job not found: ${jobName}")
                                 }
-                                
+
                                 // Check for success and set a dynamic environment variable
                                 if (targetJob.conclusion == 'success') {
                                     echo "Successfully verified ${jobName}"
@@ -89,9 +90,8 @@ pipeline {
                             echo "Frontend status: ${env.frontend_built}"
                             echo "Backend status: ${env.backend_built}"
                             echo "Database status: ${env.database_built}"
-                        
-                            return true
 
+                            return true
                         }
                     }
                 }
@@ -103,7 +103,9 @@ pipeline {
                 script {
                     // parameters evaluated as strings
 
-                    if (env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
+                    if (env.frontend_built.toBoolean() ||
+                        env.backend_built.toBoolean() ||
+                        env.database_built.toBoolean()) {
                         sshagent(['jenkins-user']) {
                             withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
                                 sh """
@@ -118,9 +120,8 @@ EOF
                 }
             }
         }
-
     }
-        
+
     post {
         always {
             cleanWs()
