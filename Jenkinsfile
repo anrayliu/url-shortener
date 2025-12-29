@@ -107,8 +107,9 @@ pipeline {
                     echo "${env.frontend_built.getClass()}"
                     echo "${env.frontend_built || env.backend_built || env.database_built}"
 
+                    // parameters evaluated as strings
 
-                    if (env.frontend_built || env.backend_built || env.database_built) {
+                    if (env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
                         sshagent(['jenkins-user']) {
                             withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
                                 sh """
