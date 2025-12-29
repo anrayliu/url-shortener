@@ -101,12 +101,6 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    echo "Frontend status: ${env.frontend_built}"
-                    echo "Backend status: ${env.backend_built}"
-                    echo "Database status: ${env.database_built}"
-                    echo "${env.frontend_built.getClass()}"
-                    echo "${env.frontend_built || env.backend_built || env.database_built}"
-
                     // parameters evaluated as strings
 
                     if (env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
