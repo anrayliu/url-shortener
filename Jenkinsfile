@@ -104,7 +104,7 @@ pipeline {
                     echo "Frontend status: ${env.frontend_built}"
                     echo "Backend status: ${env.backend_built}"
                     echo "Database status: ${env.database_built}"
-                    echo "${env.frontend_build.getClass()}"
+                    echo "${env.frontend_built.getClass()}"
                     echo "${env.frontend_built || env.backend_built || env.database_built}"
 
 
