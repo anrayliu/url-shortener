@@ -49,7 +49,6 @@ jobs:
       - name: Lint codebase
         uses: super-linter/super-linter@v7
         env:
-          VALIDATE_ALL_CODEBASE: false
           VALIDATE_DOCKERFILE_HADOLINT: true
           VALIDATE_GITHUB_ACTIONS: true
           VALIDATE_PYTHON: true
