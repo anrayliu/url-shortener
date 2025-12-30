@@ -107,10 +107,10 @@ pipeline {
 
                     echo "Branch: ${env.GIT_BRANCH}"
 
-                    if (param.force_deploy.toBoolean() || env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
+                    if (params.force_deploy.toBoolean() || env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
                         externalScript.deploy("dev-ip-addr")
 
-                        if (param.force_deploy.toBoolean() || env.GIT_BRANCH == "origin/main") {
+                        if (params.force_deploy.toBoolean() || env.GIT_BRANCH == "origin/main") {
                             externalScript.deploy("prod-ip-addr")
                         }
                     }
