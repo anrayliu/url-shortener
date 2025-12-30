@@ -108,15 +108,15 @@ pipeline {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no jenkins@\${IP_ADDR} << 'EOF'
                                         
-                                        if [${env.frontend_built} == 'true']; then
+                                        if ['${env.frontend_built}' == 'true']; then
                                             docker compose pull frontend
                                         fi
 
-                                        if [${env.backend_built} == 'true']; then
+                                        if ['${env.backend_built}' == 'true']; then
                                             docker compose pull backend
                                         fi
 
-                                        if [${env.database_built} == 'true']; then
+                                        if ['${env.database_built}' == 'true']; then
                                             docker compose pull database
                                         fi
                                         
