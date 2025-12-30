@@ -24,3 +24,4 @@ EOF
 7. Create `infrastructure/ansible/hosts` and add the node ip address to it.
 8. Run `ansible-galaxy role install geerlingguy.docker`
 9. Run ansible with `ansible-playbook setup.yaml -i hosts`
+10. Add ip addresses to Jenkins credentials.

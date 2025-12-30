@@ -127,6 +127,8 @@ EOF
                         }
 
                         echo env.BRANCH_NAME
+                        echo env.GIT_BRANCH
+                        echo scm.branches[0].name
 
                         if (env.BRANCH_NAME == "main") {
                             echo "here"
