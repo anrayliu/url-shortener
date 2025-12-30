@@ -1,0 +1,11 @@
+proxmox_endpoint   = "https://proxmox-endpoint:8006/api2/json"
+dev_root_password  = "root-password-for-dev"
+dev_container_ip   = "x.x.x.x/x"
+prod_root_password = "root-password-for-prod"
+prod_container_ip  = "x.x.x.x/x"
+dev_ssh_keys       = <<-EOF
+root-user-public-key-for-dev
+EOF
+prod_ssh_keys      = <<-EOF
+root-user-public-key-for-prod
+EOF
