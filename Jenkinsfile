@@ -9,7 +9,7 @@ pipeline {
         booleanParam(name: 'frontend_built', defaultValue: false)
         booleanParam(name: 'backend_built', defaultValue: false)
         booleanParam(name: 'database_built', defaultValue: false)
-        booleanParam(name: 'force_update_prod', defaultValue: false)
+        booleanParam(name: 'force_deploy', defaultValue: false)
     }
 
     stages {
@@ -107,10 +107,10 @@ pipeline {
 
                     echo "Branch: ${env.GIT_BRANCH}"
 
-                    if (env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
+                    if (params.force_deploy.toBoolean() || env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
                         externalScript.deploy("dev-ip-addr")
 
-                        if (param.force_update_prod.toBoolean() || env.GIT_BRANCH == "origin/main") {
+                        if (params.force_deploy.toBoolean() || env.GIT_BRANCH == "origin/main") {
                             externalScript.deploy("prod-ip-addr")
                         }
                     }
