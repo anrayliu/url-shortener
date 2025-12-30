@@ -1,15 +1,21 @@
+from psycopg2.pool import SimpleConnectionPool
 from flask import Flask, jsonify, redirect, request
 from flask_cors import CORS
-from database import Database
 from dotenv import load_dotenv
-
+import os
 
 load_dotenv()
 
-app = Flask(__name__)
+pool = SimpleConnectionPool(
+    3, 20,
+    database=os.environ["DB_NAME"],
+    host=os.environ["DB_HOST"],
+    port=os.environ["DB_PORT"],
+    user=os.environ["DB_USER"],
+    password=os.environ["DB_PASSWORD"]
+)
 
-db = Database()
-db.connect()
+app = Flask(__name__)
 
 CORS(app)
 
@@ -20,14 +26,24 @@ def hash_url(url):
 def handle_shorten():
     long_url = request.get_json().get("url")
 
+    conn = pool.getconn()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM urls WHERE long_url = %s;", (long_url,))
+
     # saved long_url, short_url pair in database
-    db_pair = db.query("SELECT * FROM urls WHERE long_url = %s;", args=(long_url,))
+    db_pair = cur.fetchone()
 
     if db_pair is None:
         short_url = hash_url(long_url)
-        db.query("INSERT INTO urls VALUES (%s, %s);", args=(long_url, short_url))
+
+        cur.execute("INSERT INTO urls VALUES (%s, %s);", (long_url, short_url))
+        conn.commit()
+
     else:
         short_url = db_pair[1]
+
+    pool.putconn(conn)
 
     data = {
         "data": {
@@ -40,7 +56,14 @@ def handle_shorten():
 
 @app.route("/api/v1/redirect/<url>")
 def handle_redirect(url):
-    db_pair = db.query("SELECT * FROM urls WHERE short_url = %s;", args=(url,))
+    conn = pool.getconn()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM urls WHERE short_url = %s;", (url,))
+
+    db_pair = cur.fetchone()
+
+    pool.putconn(conn)
 
     if db_pair is None:
         response = {"error":{
