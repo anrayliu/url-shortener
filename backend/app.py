@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 pool = SimpleConnectionPool(
-    1, 20,
+    3, 20,
     database=os.environ["DB_NAME"],
     host=os.environ["DB_HOST"],
     port=os.environ["DB_PORT"],
