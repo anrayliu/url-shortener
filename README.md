@@ -5,7 +5,7 @@ Goal: develop and deploy an app from scratch using a modern tech stack while tou
 
 Infrastructure Setup:
 
-Requires a running Jenkins server that polls this repo.
+Requires a running Jenkins server that polls your fork.
 
 1. Create a `.env` file at repo root (see `.env.example` for help).
 2. Generate 2 SSH key pairs for dev and prod root user with `ssh-keygen -t ed25519`.
