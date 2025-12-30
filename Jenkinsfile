@@ -70,8 +70,7 @@ pipeline {
 
                                 // Find the specific job in the JSON payload
                                 // adds build-and-push if job was ran, otherwise only contains jobName
-                                def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push"
-                                                                    || it.name == "${jobName}" }
+                                def targetJob = jobsJson.jobs.find { it.name == "${jobName} / build-and-push" || it.name == "${jobName}" }
 
                                 if (!targetJob) {
                                     error("GitHub Actions job not found: ${jobName}")
@@ -103,9 +102,7 @@ pipeline {
                 script {
                     // parameters evaluated as strings
 
-                    if (env.frontend_built.toBoolean() ||
-                        env.backend_built.toBoolean() ||
-                        env.database_built.toBoolean()) {
+                    if (env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
                         sshagent(['jenkins-user']) {
                             withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
                                 sh """
