@@ -107,16 +107,18 @@ pipeline {
                             withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
                                 sh """
                                     ssh -o StrictHostKeyChecking=no jenkins@\${IP_ADDR} << 'EOF'
+
+                                        echo ${env.frontend_built}
                                         
-                                        if [['${env.frontend_built}' == 'true']]; then
+                                        if [${env.frontend_built} = true]]; then
                                             docker compose pull frontend
                                         fi
 
-                                        if [['${env.backend_built}' == 'true']]; then
+                                        if [${env.backend_built} = true]]; then
                                             docker compose pull backend
                                         fi
 
-                                        if [['${env.database_built}' == 'true']]; then
+                                        if [${env.database_built} = true]]; then
                                             docker compose pull database
                                         fi
                                         
