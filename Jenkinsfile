@@ -102,36 +102,13 @@ pipeline {
                 script {
                     // parameters evaluated as strings
 
+                    def externalScript = load "deploy.groovy"
+
                     if (env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
-                        sshagent(['jenkins-user']) {
-                            withCredentials([string(credentialsId: 'dev-ip-addr', variable: 'IP_ADDR')]) {
-                                sh """
-                                    ssh -o StrictHostKeyChecking=no jenkins@\${IP_ADDR} << 'EOF'
+                        externalScript.deploy("dev-ip-addr")
 
-                                        if [ ${env.frontend_built} = true ]; then
-                                            docker compose pull frontend
-                                        fi
-
-                                        if [ ${env.backend_built} = true ]; then
-                                            docker compose pull backend
-                                        fi
-
-                                        if [ ${env.database_built} = true ]; then
-                                            docker compose pull database
-                                        fi
-                                        
-                                        docker compose up -d
-EOF
-                                """
-                            }
-                        }
-
-                        echo env.BRANCH_NAME
-                        echo env.GIT_BRANCH
-                        echo scm.branches[0].name
-
-                        if (env.BRANCH_NAME == "main") {
-                            echo "here"
+                        if (env.BRANCH_NAME == "origin/main") {
+                            externalScript.deploy("prod-ip-addr")
                         }
                     }
                 }
