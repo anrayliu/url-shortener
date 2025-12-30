@@ -2,7 +2,8 @@
 
 Goal: develop and deploy an app from scratch using a modern tech stack while touching every part of the product lifecycle.
 
-Infrastructure Setup (dev environment):
+
+Infrastructure Setup:
 
 Requires a running Jenkins server that polls this repo.
 
@@ -23,10 +24,13 @@ prod_ssh_keys = <<-EOF
 root-user-public-key-for-prod
 EOF
 ```
-4. Run `terraform init`, `terraform plan` and `terraform apply`.
-5. Create another SSH key pair for Jenkins.
-6. Add the public key path to `vars` in `infrastructure/ansible/setup.yaml`.
-7. Create `infrastructure/ansible/hosts` and add the dev and prod node IP addresses.
-8. Run `ansible-galaxy role install geerlingguy.docker`
-9. Run ansible with `ansible-playbook setup.yaml -i hosts`
-10. Add the IP addresses in Jenkins credentials as `dev-ip-addr` and `prod-ip-addr` respectively.
+5. Run `terraform init`, `terraform plan` and `terraform apply`.
+6. Create another SSH key pair for Jenkins.
+7. Add the public key path to `vars` in `infrastructure/ansible/setup.yaml`.
+8. Create `infrastructure/ansible/hosts` and add the dev and prod node IP addresses.
+9. Run `ansible-galaxy role install geerlingguy.docker`
+10. Run ansible with `ansible-playbook setup.yaml -i hosts`
+11. Add the IP addresses in Jenkins credentials as secret texts `dev-ip-addr` and `prod-ip-addr` respectively.
+12. Create another set of credentials for the Jenkins user SSH named `jenkins-user`.
+13. Go to [GitHub developer settings](https://github.com/settings/apps) and create a fine-grained PAT. Make sure it has read access to the repository "actions and metadata".
+14. Add the PAT as a secret text credential named `github-pat`.
