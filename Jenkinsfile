@@ -109,7 +109,7 @@ pipeline {
                     if (env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
                         externalScript.deploy("dev-ip-addr")
 
-                        if (env.GIT_BRANCH == "origin/feat-deploy-prod") {
+                        if (env.GIT_BRANCH == "origin/main") {
                             externalScript.deploy("prod-ip-addr")
                         }
                     }
