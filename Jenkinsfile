@@ -104,10 +104,12 @@ pipeline {
 
                     def externalScript = load "deploy.groovy"
 
+                    echo "Branch: ${env.GIT_BRANCH}"
+
                     if (env.frontend_built.toBoolean() || env.backend_built.toBoolean() || env.database_built.toBoolean()) {
                         externalScript.deploy("dev-ip-addr")
 
-                        if (env.BRANCH_NAME == "origin/main") {
+                        if (env.BRANCH_NAME == "origin/feat-deploy-prod") {
                             externalScript.deploy("prod-ip-addr")
                         }
                     }
