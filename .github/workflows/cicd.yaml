@@ -1,7 +1,9 @@
 ---
 name: cicd
 
-on: push
+on: 
+  push:
+  pull_request:
 
 jobs:
   changes:
@@ -11,6 +13,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       database: ${{ steps.filter.outputs.database }}
       cicd: ${{ steps.filter.outputs.cicd }}
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,6 +32,8 @@ jobs:
               - "backend/database/**"
             cicd:
               - ".github/workflows/**"
+            infrastructure:
+              - "infrastructure/**"  
           base: ${{ github.event.before }}
 
   lint:
@@ -38,7 +43,8 @@ jobs:
       needs.changes.outputs.frontend == 'true' ||
       needs.changes.outputs.backend == 'true' ||
       needs.changes.outputs.database == 'true' ||
-      needs.changes.outputs.cicd == 'true'
+      needs.changes.outputs.cicd == 'true' ||
+      needs.changes.outputs.infrastructure == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,7 +53,6 @@ jobs:
       - name: Lint codebase
         uses: super-linter/super-linter@v7
         env:
-          VALIDATE_ALL_CODEBASE: false
           VALIDATE_DOCKERFILE_HADOLINT: true
           VALIDATE_GITHUB_ACTIONS: true
           VALIDATE_PYTHON: true
@@ -55,6 +60,9 @@ jobs:
           VALIDATE_CSS: true
           VALIDATE_GITLEAKS: true
           VALIDATE_YAML: true
+          VALIDATE_ANSIBLE: true
+          VALIDATE_TERRAFORM_FMT: true
+          VALIDATE_TERRAFORM_TFLINT: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   run-tests:
