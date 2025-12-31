@@ -3,11 +3,13 @@ from flask import Flask, jsonify, redirect, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+import hashlib
+
 
 load_dotenv()
 
 pool = SimpleConnectionPool(
-    3, 20,
+    3, 20, # min and max connections
     database=os.environ["DB_NAME"],
     host=os.environ["DB_HOST"],
     port=os.environ["DB_PORT"],
@@ -19,8 +21,17 @@ app = Flask(__name__)
 
 CORS(app)
 
-def hash_url(url):
-    return str(hash(url))
+
+def hash_url(url, cur):
+    exists = True
+
+    while exists:
+        sha = hashlib.sha256(url.encode('utf-8')).hexdigest()[:7]
+        cur.execute("SELECT * FROM urls WHERE short_url = %s;", (sha,))
+        exists = cur.fetchone() is not None
+        url += "a"
+
+    return sha
 
 @app.route("/api/v1/shorten", methods=["POST"]) 
 def handle_shorten():
@@ -35,7 +46,7 @@ def handle_shorten():
     db_pair = cur.fetchone()
 
     if db_pair is None:
-        short_url = hash_url(long_url)
+        short_url = hash_url(long_url, cur)
 
         cur.execute("INSERT INTO urls VALUES (%s, %s);", (long_url, short_url))
         conn.commit()
@@ -76,7 +87,9 @@ def handle_redirect(url):
     if not redirect_url.startswith("http://") and not redirect_url.startswith("https://"):
         redirect_url = "http://" + redirect_url
 
-    return redirect(redirect_url)
+    # 301 status code will reduce server load because browsers will cache the redirected url
+
+    return redirect(redirect_url, code=301)
 
 @app.route("/<url>")
 def handle_main(url):
