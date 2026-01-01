@@ -72,7 +72,7 @@ jobs:
     steps:
       - name: Placeholder test, currently only running status tests
         id: unit-tests
-        run: echo "tests passed"
+        run: cd backend && python3 -m unittest discover
 
   build-and-push-frontend:
     needs: changes
