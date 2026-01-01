@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 
 CORS(app)
 
-# function can be patched for unit testing
-def connect_database():
-    return psycopg2.pool.SimpleConnectionPool(
+# init db connections
+with app.app_context():
+    pool = psycopg2.pool.SimpleConnectionPool(
         3, 20, # min and max connections
         database=os.environ["DB_NAME"],
         host=os.environ["DB_HOST"],
@@ -28,10 +28,6 @@ def connect_database():
         user=os.environ["DB_USER"],
         password=os.environ["DB_PASSWORD"]
     )
-
-# init db connections
-with app.app_context():
-    pool = connect_database()
 
 
 # grabs an available connection from the pool
