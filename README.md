@@ -8,12 +8,12 @@ Goal: Develop and deploy an app from scratch using a modern tech stack while tou
 - 3-tier application architecture that separates the web interface, REST API, and database.
 - Isolated dev and prod environments. Changes are only applied to prod once merged into the main branch.
 - On-prem system. Everything is ran on my bare-metal server.
-- "Hybrid" CICD design. Combines modern GitHub Actions workflows with a local Jenkins server specifically for deployments.
+- "Hybrid" CICD design. Combines modern GitHub Actions workflows with a local Jenkins server specifically for deployments. This design ultimately allows the online workflows to trigger deployments without exposing my intranet.
 - Deploy the application for local testing with simple Docker Compose commands.
 
 ## Infrastructure Setup
 
-While the application is loosely coupled and can be served with Docker images, the infrastructure setup is designed to fit
+While the application is loosely coupled and can be served as Docker images, the infrastructure setup is designed to fit
 my own on-prem hardware. Requires a multibranch Jenkins job.
 
 1. Create a `.env` file at repo root (see `.env.example` for help).
