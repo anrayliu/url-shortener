@@ -11,7 +11,7 @@ from unittest.mock import patch
 class TestApi(unittest.TestCase):
     def test_shorten_no_body(self):
         # prevent connecting to database
-        with patch("psycopg2.pool.SimpleConnectionPool", return_value=None):
+        with patch("psycopg2.pool.SimpleConnectionPool", return_value=12093809123):
             from app import app
 
             client = app.test_client()
