@@ -9,16 +9,18 @@ from unittest.mock import patch
 
 
 class TestApi(unittest.TestCase):
-    def test_shorten_no_body(self):
+    @patch("psycopg2.pool.SimpleConnectionPool")
+    def test_shorten_no_body(self, mock_pool):
         # prevent connecting to database
-        with patch("psycopg2.pool.SimpleConnectionPool", return_value=12093809123):
-            from app import app
+        mock_pool.return_value = None
 
-            client = app.test_client()
-            
-            response = client.post("/api/v1/shorten", json={})
-            
-            self.assertEqual(response.status_code, 400)
+        from app import app
+
+        client = app.test_client()
+        
+        response = client.post("/api/v1/shorten", json={})
+        
+        self.assertEqual(response.status_code, 400)
 
 
 if __name__ == "__main__":
