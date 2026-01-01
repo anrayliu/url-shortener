@@ -1,5 +1,4 @@
 import os
-import multiprocessing
 
 
 bind = f"0.0.0.0:{os.environ["API_PORT"]}"
