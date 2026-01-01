@@ -4,10 +4,10 @@ from flask import Flask, jsonify, redirect, request, abort
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os # environ()
-import hashlib # sha256()
 import logging # getLogger()
 import string # ascii_letters
 import random # choice()
+import helpers
 
 
 load_dotenv()
@@ -57,7 +57,7 @@ def hash_url(url, conn):
 
     while exists:
         # short url is the first 7 digits in a sha256 hash
-        sha = hashlib.sha256(url.encode("utf-8")).hexdigest()[:7]
+        sha = helpers.get_hashed(url)
         exists = exec_query(conn, "SELECT * FROM urls WHERE short_url = %s;", (sha,)) is not None
         
         # adds a random letter to the long url if hash is a conflict
@@ -107,13 +107,9 @@ def handle_redirect(url):
     if db_pair is None:
         abort(400, description="Short URL does not exist")
 
-    redirect_url = db_pair[0]
-    if not redirect_url.startswith("http://") and not redirect_url.startswith("https://"):
-        redirect_url = "http://" + redirect_url
-
     # 301 status code will reduce server load because browsers will cache the redirected url
 
-    return redirect(redirect_url, code=301)
+    return redirect(helpers.append_http(db_pair[0]), code=301)
 
 @app.route("/<url>")
 def handle_main(url):
