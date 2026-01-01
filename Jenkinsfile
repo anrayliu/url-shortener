@@ -23,6 +23,13 @@ pipeline {
         stage('Check GitHub Actions Job') {
             steps {
                 script {
+                    // prevent null values
+                    env.frontend_built = params.frontend_built
+                    env.backend_built = params.backend_built
+                    env.database_built = params.database_built
+                    env.force_deploy = params.force_deploy
+
+
                     withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
                         // repeat until github actions run is complete
                         waitUntil {
