@@ -47,8 +47,6 @@ jobs:
       needs.changes.outputs.infrastructure == 'true'
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Lint codebase
         uses: super-linter/super-linter@v7
@@ -70,9 +68,11 @@ jobs:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     steps:
+      - uses: actions/checkout@v4
+
       - name: Placeholder test, currently only running status tests
         id: unit-tests
-        run: cd ${{ github.workspace }}/backend && python3 -m unittest discover
+        run: cd backend && python3 -m unittest discover
 
   build-and-push-frontend:
     needs: changes
