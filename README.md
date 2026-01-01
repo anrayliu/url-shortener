@@ -1,11 +1,20 @@
-# url-shortener
+# DevOps Project: URL Shortener
 
-Goal: develop and deploy an app from scratch using a modern tech stack while touching every part of the product lifecycle.
+Goal: Develop and deploy an app from scratch using a modern tech stack while touching every part of the product lifecycle.
 
+## Features
 
-Infrastructure Setup:
+- No "ClickOps". Infrastructure is managed as code with Terraform and Ansible.
+- 3-tier application architecture that separates the web interface, REST API, and database.
+- Isolated dev and prod environments. Changes are only applied to prod once merged into the main branch.
+- On-prem system. Everything is ran on my bare-metal server.
+- "Hybrid" CICD design. Combines modern GitHub Actions workflows with a local Jenkins server specifically for deployments.
+- Deploy the application for local testing with simple Docker Compose commands.
 
-Requires a multibranch Jenkins job.
+## Infrastructure Setup
+
+While the application is loosely coupled and can be served with Docker images, the infrastructure setup is designed to fit
+my own on-prem hardware. Requires a multibranch Jenkins job.
 
 1. Create a `.env` file at repo root (see `.env.example` for help).
 2. Generate 2 SSH key pairs for dev and prod root user with `ssh-keygen -t ed25519`.
