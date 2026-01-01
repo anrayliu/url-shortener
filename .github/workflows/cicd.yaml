@@ -72,7 +72,7 @@ jobs:
 
       - name: Install dependency and run tests
         id: unit-tests
-        run: cd backend && python -m pip install psycopg2-binary && python3 -m unittest discover
+        run: cd backend && python -m pip install -r requirements.txt && python3 -m unittest discover
 
   build-and-push-frontend:
     needs: changes
