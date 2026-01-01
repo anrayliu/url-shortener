@@ -1,3 +1,13 @@
-FROM nginx:1.29-alpine
+FROM python:3.12-slim
 
-COPY frontend /usr/share/nginx/html
+RUN apt-get update && apt-get upgrade -y
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN python3 -m venv /opt/venv && pip install --no-cache-dir -r requirements.txt
+
+COPY frontend .
+
+CMD ["gunicorn", "app:app"]

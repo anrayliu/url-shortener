@@ -11,7 +11,6 @@
   tasks:
   - name: Upgrade packages
     apt:
-      update_cache: true
       upgrade: yes
       
   - name: Install docker
@@ -38,6 +37,20 @@
     ansible.builtin.copy:
       src: ../../.env
       dest: /home/jenkins/.env
+
+  - name: Update dev IP address
+    ansible.builtin.lineinfile:
+      path: /home/jenkins/.env
+      regexp: '^API_HOST='
+      line: "API_HOST={{ lookup('ansible.builtin.env', 'DEV_HOST') }}"
+    delegate_to: dev
+
+  - name: Update prod IP address
+    ansible.builtin.lineinfile:
+      path: /home/jenkins/.env
+      regexp: '^API_HOST='
+      line: "API_HOST={{ lookup('ansible.builtin.env', 'PROD_HOST') }}"
+    delegate_to: prod
 
   - name: Download compose file
     ansible.builtin.get_url:
