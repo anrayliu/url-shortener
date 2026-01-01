@@ -72,7 +72,7 @@ jobs:
     steps:
       - name: Placeholder test, currently only running status tests
         id: unit-tests
-        run: ls && python3 -m unittest discover
+        run: cd ${{ github.workspace }}/backend && python3 -m unittest discover
 
   build-and-push-frontend:
     needs: changes
