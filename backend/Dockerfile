@@ -12,3 +12,4 @@ RUN python3 -m venv /opt/venv && pip install --no-cache-dir -r requirements.txt
 COPY backend .
 
 CMD ["gunicorn", "app:app"]
+
