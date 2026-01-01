@@ -20,10 +20,10 @@ resource "proxmox_lxc" "dev" {
   ssh_public_keys = var.dev_ssh_keys
   hostname        = "url-shortener-dev"
   network {
-    name         = "eth0"
-    bridge       = "vmbr0"
-    ip = var.dev_container_ip
-    gw = "10.0.0.1"
+    name   = "eth0"
+    bridge = "vmbr0"
+    ip     = var.dev_container_ip
+    gw     = "10.0.0.1"
   }
   rootfs {
     storage = "local-lvm"
@@ -46,10 +46,10 @@ resource "proxmox_lxc" "prod" {
   ssh_public_keys = var.prod_ssh_keys
   hostname        = "url-shortener-prod"
   network {
-    name         = "eth0"
-    bridge       = "vmbr0"
-    ip = var.prod_container_ip
-    gw = "10.0.0.1"
+    name   = "eth0"
+    bridge = "vmbr0"
+    ip     = var.prod_container_ip
+    gw     = "10.0.0.1"
 
   }
   rootfs {
