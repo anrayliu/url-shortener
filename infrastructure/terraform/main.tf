@@ -20,13 +20,14 @@ resource "proxmox_lxc" "dev" {
   ssh_public_keys = var.dev_ssh_keys
   hostname        = "url-shortener-dev"
   network {
-    name   = "eth0"
-    bridge = "vmbr0"
-    ip     = var.dev_container_ip
+    name         = "eth0"
+    bridge       = "vmbr0"
+    ip = var.dev_container_ip
+    gw = "10.0.0.1"
   }
   rootfs {
     storage = "local-lvm"
-    size    = "4G"
+    size    = "8G"
   }
   ostemplate   = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
   cores        = 1
@@ -45,13 +46,15 @@ resource "proxmox_lxc" "prod" {
   ssh_public_keys = var.prod_ssh_keys
   hostname        = "url-shortener-prod"
   network {
-    name   = "eth0"
-    bridge = "vmbr0"
-    ip     = var.prod_container_ip
+    name         = "eth0"
+    bridge       = "vmbr0"
+    ip = var.prod_container_ip
+    gw = "10.0.0.1"
+
   }
   rootfs {
     storage = "local-lvm"
-    size    = "4G"
+    size    = "8G"
   }
   ostemplate   = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
   cores        = 1
