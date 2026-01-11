@@ -1,12 +1,14 @@
+import os # environ()
+import logging # getLogger()
+import string # ascii_letters
+import random # choice()
+
 import psycopg2
 import psycopg2.pool
 from flask import Flask, jsonify, redirect, request, abort
 from flask_cors import CORS
 from dotenv import load_dotenv
-import os # environ()
-import logging # getLogger()
-import string # ascii_letters
-import random # choice()
+
 import helpers
 
 
