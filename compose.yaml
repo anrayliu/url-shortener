@@ -37,8 +37,6 @@ services:
       context: .
       dockerfile: backend/database/Dockerfile
     image: anrayliu/url-shortener-database:latest
-    ports:
-      - ${DB_PORT}:${DB_PORT}
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
