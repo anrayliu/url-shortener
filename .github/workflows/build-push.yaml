@@ -30,6 +30,7 @@ jobs:
           export API_PORT=1
           export WEB_PORT=1
           export DB_PORT=1
+          export PROMETHEUS_PORT=1
 
           docker compose build ${{ inputs.image }}
 

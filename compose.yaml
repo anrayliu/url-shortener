@@ -50,3 +50,9 @@ services:
       retries: 5
       start_period: 40s
     restart: on-failure
+
+  metrics:
+    image: prom/prometheus:v3.9.1
+    depends_on:
+      backend:
+        condition: service_healthy

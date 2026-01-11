@@ -8,6 +8,7 @@ import psycopg2.pool
 from flask import Flask, jsonify, redirect, request, abort
 from flask_cors import CORS
 from dotenv import load_dotenv
+from prometheus_client import Counter
 
 import helpers
 
@@ -30,6 +31,23 @@ with app.app_context():
         user=os.environ["DB_USER"],
         password=os.environ["DB_PASSWORD"]
     )
+request_count = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"]
+)
+
+@app.after_request
+def record_metrics(response):
+    endpoint = request.endpoint or "unknown"
+
+    request_count.labels(
+        request.method,
+        endpoint,
+        response.status_code
+    ).inc()
+
+    return response
 
 
 # grabs an available connection from the pool
