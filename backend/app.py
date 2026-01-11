@@ -1,12 +1,15 @@
+import os # environ()
+import logging # getLogger()
+import string # ascii_letters
+import random # choice()
+
 import psycopg2
 import psycopg2.pool
 from flask import Flask, jsonify, redirect, request, abort
 from flask_cors import CORS
 from dotenv import load_dotenv
-import os # environ()
-import logging # getLogger()
-import string # ascii_letters
-import random # choice()
+from prometheus_client import Counter
+
 import helpers
 
 
@@ -19,15 +22,32 @@ logger = logging.getLogger(__name__)
 CORS(app)
 
 # init db connections
-with app.app_context():
-    pool = psycopg2.pool.SimpleConnectionPool(
-        3, 20, # min and max connections
-        database=os.environ["DB_NAME"],
-        host=os.environ["DB_HOST"],
-        port=os.environ["DB_PORT"],
-        user=os.environ["DB_USER"],
-        password=os.environ["DB_PASSWORD"]
-    )
+pool = psycopg2.pool.SimpleConnectionPool(
+    3, 20, # min and max connections
+    database=os.environ["DB_NAME"],
+    host=os.environ["DB_HOST"],
+    port=os.environ["DB_PORT"],
+    user=os.environ["DB_USER"],
+    password=os.environ["DB_PASSWORD"]
+)
+
+request_count = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"]
+)
+
+@app.after_request
+def record_metrics(response):
+    endpoint = request.endpoint or "unknown"
+
+    request_count.labels(
+        request.method,
+        endpoint,
+        response.status_code
+    ).inc()
+
+    return response
 
 
 # grabs an available connection from the pool
