@@ -2,6 +2,10 @@
 
 Goal: Develop and deploy an app from scratch using a modern tech stack while touching every part of the product lifecycle.
 
+
+<!-- <img src="architectural-diagram.png" alt="drawing" width="1000"/> -->
+![architectural-diagram](architectural-diagram.png)
+
 ## Features
 
 - No "ClickOps". Infrastructure is managed as code with Terraform and Ansible.
