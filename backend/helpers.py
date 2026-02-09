@@ -14,9 +14,6 @@ def append_http(url):
         return "http://" + url
     return url
 
-def get_hashed(url):
-    return hashlib.sha256(url.encode("utf-8")).hexdigest()[:7]
-
 # grabs an available connection from the pool
 def get_connection(pool):
     try:
@@ -44,7 +41,7 @@ def hash_url(url, conn):
 
     while exists:
         # short url is the first 7 digits in a sha256 hash
-        sha = get_hashed(url)
+        sha = hashlib.sha256(url.encode("utf-8")).hexdigest()[:7]
         exists = exec_query(conn, "SELECT * FROM urls WHERE short_url = %s;", (sha,)) is not None
         
         # adds a random letter to the long url if hash is a conflict
