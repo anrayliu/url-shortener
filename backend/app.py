@@ -26,6 +26,7 @@ pool = psycopg2.pool.SimpleConnectionPool(
     password=os.environ["DB_PASSWORD"]
 )
 
+# prometheus metrics
 request_count = Counter(
     "http_requests_total",
     "Total HTTP requests",
@@ -66,6 +67,9 @@ def handle_shorten():
 
     pool.putconn(conn)
 
+    # follows Google's REST API response format
+    # https://stackoverflow.com/questions/12806386/is-there-any-standard-for-json-api-response-format#:~:text=Google%20JSON%20guide
+
     data = {
         "data": {
             "longUrl": long_url,
@@ -79,6 +83,7 @@ def handle_shorten():
 def handle_redirect(url):
     conn = helpers.get_connection(pool)
 
+    # find saved long_url, short_url pair in database
     db_pair =  helpers.exec_query(conn, "SELECT * FROM urls WHERE short_url = %s;", (url,))
 
     pool.putconn(conn)
