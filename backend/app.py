@@ -1,8 +1,9 @@
 import os
+from typing import Any
 
 import psycopg2
 import psycopg2.pool
-from flask import Flask, jsonify, redirect, request, abort
+from flask import Flask, jsonify, redirect, request, abort, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
 from prometheus_client import Counter
@@ -34,7 +35,7 @@ request_count = Counter(
 )
 
 @app.after_request
-def record_metrics(response):
+def record_metrics(response: Response) -> Response:
     endpoint = request.endpoint or "unknown"
 
     request_count.labels(
@@ -46,7 +47,7 @@ def record_metrics(response):
     return response
 
 @app.route("/api/v1/shorten", methods=["POST"]) 
-def handle_shorten():
+def handle_shorten() -> Response:
     long_url = request.get_json().get("url")
     if long_url is None:
         abort(400, description="Missing 'long_url'")
@@ -80,7 +81,7 @@ def handle_shorten():
     return jsonify(data)
 
 @app.route("/api/v1/redirect/<url>")
-def handle_redirect(url):
+def handle_redirect(url: str) -> Response:
     conn = helpers.get_connection(pool)
 
     # find saved long_url, short_url pair in database
@@ -96,7 +97,7 @@ def handle_redirect(url):
     return redirect(helpers.append_http(db_pair[0]), code=301)
 
 @app.route("/<url>")
-def handle_main(url):
+def handle_main(url: str) -> Response:
     return redirect(f"/api/v1/redirect/{url}")
 
 

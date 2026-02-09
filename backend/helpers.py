@@ -2,6 +2,7 @@ import hashlib
 import random
 import logging
 import string
+from typing import Optional, Any, Sequence, Tuple
 
 import psycopg2
 from flask import abort
@@ -9,13 +10,13 @@ from flask import abort
 
 logger = logging.getLogger(__name__)
 
-def append_http(url):
+def append_http(url: str) -> str:
     if not url.startswith("http://") and not url.startswith("https://"):
         return "http://" + url
     return url
 
 # grabs an available connection from the pool
-def get_connection(pool):
+def get_connection(pool: "psycopg2.pool.SimpleConnectionPool") -> "psycopg2.extensions.connection":
     try:
         conn = pool.getconn()
     except psycopg2.pool.PoolError as e:
@@ -24,7 +25,7 @@ def get_connection(pool):
     
     return conn
 
-def exec_query(conn, query, args, fetch=True):
+def exec_query(conn: "psycopg2.extensions.connection", query: str, args: Optional[Sequence[Any]] = None, fetch: bool = True) -> Optional[Tuple[Any, ...]]:
     with conn.cursor() as cur:
         try:
             cur.execute(query, args)
@@ -36,7 +37,7 @@ def exec_query(conn, query, args, fetch=True):
         if fetch:
             return cur.fetchone()
 
-def hash_url(url, conn):
+def hash_url(url: str, conn: "psycopg2.extensions.connection") -> str:
     exists = True
 
     while exists:
