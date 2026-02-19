@@ -1,0 +1,4 @@
+---
+vulnerabilities:
+  - id: CVE-2025-68121
+    statement: "Refer to https://github.com/docker-library/postgres/issues/1324"
