@@ -2,6 +2,6 @@
 # to respect the 3-tier architecture
 
 
-FROM postgres:18.1
+FROM postgres:18.2
 
 COPY backend/database/init.sql /docker-entrypoint-initdb.d/init.sql
