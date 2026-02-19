@@ -15,3 +15,4 @@ Goal: Develop and deploy an app from scratch using a modern tech stack while tou
 - On-prem system. Everything is ran on my bare-metal server.
 - Local testing simplified with Docker Compose.
 - Bread and butter observability with Prometheus and Grafana.
+- Stay on guard with daily Trivy and Dependabot vulernability scans.
