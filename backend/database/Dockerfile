@@ -4,4 +4,7 @@
 
 FROM postgres:18.1
 
+# not needed and has a vulnerability
+RUN rm -rf /usr/local/bin/gosu
+
 COPY backend/database/init.sql /docker-entrypoint-initdb.d/init.sql
