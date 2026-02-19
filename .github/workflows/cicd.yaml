@@ -63,6 +63,7 @@ jobs:
           VALIDATE_ANSIBLE: true
           VALIDATE_TERRAFORM_FMT: true
           VALIDATE_TERRAFORM_TFLINT: true
+          TRIVY_CONFIG_FILE: ".github/linters/trivy.yaml"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   run-tests:
